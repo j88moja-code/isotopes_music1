@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  database:
+    build:
+      context: .
+      dockerfile: ./docker/mysql/Dockerfile
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    env_file: backend/venv/.env
+    ports:
+      - "3302:3306"
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/python/Dockerfile
+    env_file: backend/venv/.env
+    restart: always
+    volumes:
+      - ./backend:/app
+      - ./media:/app/media
+    depends_on:
+      - database
+    working_dir: "/app/"
+    expose:
+      - 8001
+    ports:
+      - "8001:8001"
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8001"]
+  
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    command: npm start
+    ports:
+    - 3000:3000
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - server
+    
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  mysql_data:

@@ -1,0 +1,6 @@
+migrations/
+venv
+.env
+/node_modules
+/.pnp
+.pnp.js
